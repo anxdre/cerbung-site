@@ -59,7 +59,7 @@ class CerbungApi extends Controller
         $cerbungStory->save();
 
 
-        return response()->json(new BaseResponseResource(true, "Success Add Cerbung", ['cerbung' => $cerbung, 'cerbung_story' => $cerbungStory]));
+        return response()->json(new BaseResponseResource(true, "Success Add Cerbung", $cerbung->loadMissing(['cerbungStory'])));
     }
 
     #[Get('{id}', '.cerbung-by-id')]

@@ -55,6 +55,7 @@ return [
     'api' => [
         \App\Http\Controllers\api\AuthApi::class,
         \App\Http\Controllers\api\CerbungApi::class,
-        \App\Http\Controllers\api\NotificationApi::class
+        \App\Http\Controllers\api\NotificationApi::class,
+        \App\Http\Controllers\api\FollowingApi::class
     ],
 ];
