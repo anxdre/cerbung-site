@@ -6,9 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\BaseResponseResource;
 use App\Models\Cerbung;
 use App\Models\CerbungStory;
-use App\Models\Dolanan;
-use App\Models\Jadwal;
-use App\Models\UserParty;
 use Dentro\Yalr\Attributes\Get;
 use Dentro\Yalr\Attributes\Name;
 use Dentro\Yalr\Attributes\Post;
@@ -16,7 +13,7 @@ use Dentro\Yalr\Attributes\Prefix;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-#[Prefix('cerbung'),Name('.cerbung')]
+#[Prefix('cerbung'), Name('.cerbung')]
 class CerbungApi extends Controller
 {
     #[Get('/', '.all')]
@@ -69,10 +66,37 @@ class CerbungApi extends Controller
             return response()->json(new BaseResponseResource(false, 'Cerbung id is required', null), 422);
         }
 
-        $cerbung = Cerbung::query()->find($id)->loadMissing(['cerbungStory']);
+        $cerbung = Cerbung::query()->find($id);
         if ($cerbung == null) {
             return response()->json(new BaseResponseResource(false, 'Cerbung not found', null), 404);
         }
-        return response()->json(new BaseResponseResource(true, "Success", $cerbung));
+        return response()->json(new BaseResponseResource(true, "Success", $cerbung->loadMissing('cerbungStory')));
+    }
+
+    #[Post('/paragraph','.add-paragraph')]
+    public function addNewParagraph(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'paragraph' => 'required',
+            'id_users' => 'required',
+            'id_cerbung' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(new BaseResponseResource(false, $validator->errors()->first(), null), 422);
+        }
+
+        $cerbung = Cerbung::query()->find($request->id_cerbung);
+        if ($cerbung == null){
+            return response()->json(new BaseResponseResource(false, "Cerbung not found", null), 422);
+        }
+
+        $data = new CerbungStory();
+        $data->cerbung_id = $cerbung->id;
+        $data->user_id = $request->id_users;
+        $data->desc = $request->paragraph;
+        $data->save();
+
+        return response()->json(new BaseResponseResource(true, "Success adding new paragraph", $data));
     }
 }
